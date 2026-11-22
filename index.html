@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXITE DAILY — Kirana Delivery</title>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#14532d" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { --primary: #14532d; --accent: #d97706; }
+    body { font-family: system-ui, -apple-system, sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 pb-24">
+
+  <!-- Pincode Verification Modal (Screen 1) -->
+  <div id="pincodeModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+      <h2 class="text-xl font-bold text-[#14532d]">NEXITE DAILY</h2>
+      <p class="text-sm text-gray-600 mt-1">Delivery check karne ke liye apna Pincode daalein:</p>
+      <input id="pincodeInput" type="number" placeholder="e.g. 342001"
+        class="w-full mt-3 border rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-[#14532d]" />
+      <p id="pincodeMsg" class="text-xs text-red-600 mt-2 hidden"></p>
+      <button onclick="verifyPincode()"
+        class="w-full mt-4 bg-[#14532d] text-white font-semibold py-3 rounded-xl">
+        Check Availability
+      </button>
+    </div>
+  </div>
+
+  <!-- Top Header & Search (Screen 2) -->
+  <header class="bg-[#14532d] text-white sticky top-0 z-30 shadow">
+    <div class="max-w-xl mx-auto px-4 py-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="font-bold text-lg tracking-wide">NEXITE DAILY</h1>
+          <button onclick="openPincodeModal()" class="text-xs text-green-200 underline">
+            Deliver to: <span id="activePincode">Select Area</span>
+          </button>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="openBuyAgain()" class="bg-white/15 px-3 py-1.5 rounded-lg text-xs font-semibold">
+            Buy Again
+          </button>
+          <button onclick="openOrdersModal()" class="bg-[#d97706] px-3 py-1.5 rounded-lg text-xs font-semibold">
+            My Orders
+          </button>
+        </div>
+      </div>
+      <input id="searchInput" oninput="renderProducts()" type="text"
+        placeholder="Search 'Aata', 'Dal', 'Oil', 'Milk'..."
+        class="w-full mt-3 px-4 py-2.5 rounded-xl text-gray-900 text-sm focus:outline-none" />
+    </div>
+  </header>
+
+  <main class="max-w-xl mx-auto px-4 pt-4">
+    <!-- Offer Banner -->
+    <div id="offerBanner" class="bg-gradient-to-r from-[#14532d] to-green-700 text-white rounded-2xl p-4 mb-4 flex justify-between items-center">
+      <div>
+        <span class="bg-[#d97706] text-xs font-bold px-2 py-0.5 rounded">OFFER</span>
+        <p class="font-bold text-base mt-1">Code WELCOME30 se ₹30 OFF</p>
+        <p class="text-xs text-green-100">₹300+ order par Free Delivery!</p>
+      </div>
+    </div>
+
+    <!-- Category Pills -->
+    <div id="categoryBar" class="flex gap-2 overflow-x-auto pb-2 mb-4 no-scrollbar"></div>
+
+    <!-- Product Grid (Screen 3) -->
+    <div id="productGrid" class="grid grid-cols-2 gap-3"></div>
+  </main>
+
+  <!-- WhatsApp Support Floating Button (Screen 7) -->
+  <a id="waHelpBtn" href="https://wa.me/919999999999?text=Hello%20NEXITE%20DAILY%20Support" target="_blank"
+    class="fixed bottom-20 right-4 bg-green-600 text-white px-4 py-2.5 rounded-full shadow-lg text-xs font-bold z-30">
+    WhatsApp Help
+  </a>
+
+  <!-- Sticky Cart Bar -->
+  <div id="cartBar" onclick="openCartModal()"
+    class="hidden fixed bottom-3 left-4 right-4 max-w-xl mx-auto bg-[#14532d] text-white rounded-2xl px-4 py-3 shadow-xl flex justify-between items-center cursor-pointer z-40">
+    <div>
+      <p class="text-xs text-green-200"><span id="cartCount">0</span> Items</p>
+      <p class="font-bold text-base">₹<span id="cartTotal">0</span></p>
+    </div>
+    <span class="bg-[#d97706] px-4 py-2 rounded-xl font-bold text-sm">View Cart →</span>
+  </div>
+
+  <!-- Cart & Checkout Modal (Screen 5 & 6) -->
+  <div id="cartModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center">
+    <div class="bg-white rounded-t-3xl sm:rounded-2xl p-5 max-w-xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-lg font-bold">Your Basket</h2>
+        <button onclick="closeModal('cartModal')" class="text-gray-500 font-bold text-xl">✕</button>
+      </div>
+
+      <div id="freeDeliveryNudge" class="bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold p-2.5 rounded-xl mb-3"></div>
+      <div id="cartItemsList" class="divide-y mb-4"></div>
+
+      <!-- Coupon -->
+      <div class="flex gap-2 mb-4">
+        <input id="couponInput" type="text" placeholder="Coupon (e.g. WELCOME30)"
+          class="flex-1 border rounded-xl px-3 py-2 text-sm uppercase" />
+        <button onclick="applyCoupon()" class="bg-[#14532d] text-white px-4 rounded-xl text-sm font-semibold">Apply</button>
+      </div>
+
+      <!-- Delivery Slot & Details -->
+      <div class="space-y-2.5 text-sm mb-4">
+        <input id="custName" type="text" placeholder="Full Name" class="w-full border rounded-xl px-3 py-2.5" />
+        <input id="custPhone" type="tel" placeholder="10-digit Mobile Number" class="w-full border rounded-xl px-3 py-2.5" />
+        <textarea id="custAddress" rows="2" placeholder="House No, Colony, Landmark" class="w-full border rounded-xl px-3 py-2.5"></textarea>
+        <select id="deliverySlot" class="w-full border rounded-xl px-3 py-2.5 bg-white">
+          <option value="Morning (8 AM - 11 AM)">Morning Slot (8 AM - 11 AM)</option>
+          <option value="Evening (4 PM - 8 PM)">Evening Slot (4 PM - 8 PM)</option>
+          <option value="Express (60-90 Mins)">Express Delivery (60-90 Mins)</option>
+        </select>
+        <select id="paymentMode" class="w-full border rounded-xl px-3 py-2.5 bg-white">
+          <option value="COD">Cash on Delivery (Open Box Check)</option>
+          <option value="UPI">Pay via UPI (GPay / PhonePe / Paytm)</option>
+        </select>
+      </div>
+
+      <!-- Bill Summary -->
+      <div id="billSummary" class="bg-gray-50 p-3 rounded-xl text-sm space-y-1 mb-4"></div>
+
+      <button id="placeOrderBtn" onclick="placeOrder()"
+        class="w-full bg-[#d97706] text-white font-bold py-3.5 rounded-xl text-base">
+        Confirm Order
+      </button>
+    </div>
+  </div>
+
+  <!-- Live Orders & Status Modal (Screen 6) -->
+  <div id="ordersModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center">
+    <div class="bg-white rounded-t-3xl sm:rounded-2xl p-5 max-w-xl w-full max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-lg font-bold">Live Order Status</h2>
+        <button onclick="closeModal('ordersModal')" class="text-gray-500 font-bold text-xl">✕</button>
+      </div>
+      <div id="myOrdersList" class="space-y-3"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, increment, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // APNA FIREBASE CONFIG YAHAN PASTE KAREIN
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let products = [];
+    let cart = JSON.parse(localStorage.getItem('nd_cart') || '{}');
+    let selectedCategory = 'All';
+    let appliedDiscount = 0;
+    let storeSettings = {
+      pincodes: ['342001', '342003', '342008'],
+      freeDeliveryMin: 299,
+      deliveryFee: 25,
+      handlingFee: 5,
+      upiId: 'yourbusiness@upi'
+    };
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+
+    // Live Store Settings Sync
+    onSnapshot(doc(db, 'settings', 'store'), (snap) => {
+      if (snap.exists()) storeSettings = { ...storeSettings, ...snap.data() };
+    });
+
+    // Live Products Sync (1-second sync from Admin Panel)
+    onSnapshot(collection(db, 'products'), (snap) => {
+      products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderCategories();
+      renderProducts();
+      updateCartUI();
+    });
+
+    // Pincode Check
+    const savedPin = localStorage.getItem('nd_pincode');
+    if (savedPin) {
+      document.getElementById('activePincode').textContent = savedPin;
+      document.getElementById('pincodeModal').classList.add('hidden');
+    }
+
+    window.openPincodeModal = () => document.getElementById('pincodeModal').classList.remove('hidden');
+    window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
+    window.verifyPincode = () => {
+      const pin = document.getElementById('pincodeInput').value.trim();
+      const msg = document.getElementById('pincodeMsg');
+      if (storeSettings.pincodes.includes(pin)) {
+        localStorage.setItem('nd_pincode', pin);
+        document.getElementById('activePincode').textContent = pin;
+        document.getElementById('pincodeModal').classList.add('hidden');
+        msg.classList.add('hidden');
+      } else {
+        msg.textContent = 'Sorry! Abhi sirf selected zones me delivery available hai: ' + storeSettings.pincodes.join(', ');
+        msg.classList.remove('hidden');
+      }
+    };
+
+    function renderCategories() {
+      const cats = ['All', ...new Set(products.map(p => p.category || 'Grocery'))];
+      document.getElementById('categoryBar').innerHTML = cats.map(c => `
+        <button onclick="setCategory('${c}')"
+          class="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${
+            selectedCategory === c ? 'bg-[#14532d] text-white' : 'bg-white border text-gray-700'
+          }">${c}</button>
+      `).join('');
+    }
+
+    window.setCategory = (cat) => { selectedCategory = cat; renderCategories(); renderProducts(); };
+
+    window.renderProducts = () => {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filtered = products.filter(p => {
+        const matchCat = selectedCategory === 'All' || p.category === selectedCategory;
+        const text = `${p.name} ${p.keywords || ''} ${p.brand || ''} ${p.category || ''}`.toLowerCase();
+        return matchCat && text.includes(q);
+      });
+
+      document.getElementById('productGrid').innerHTML = filtered.map(p => {
+        const qty = cart[p.id] || 0;
+        const outOfStock = (p.stock || 0) <= 0;
+        const discount = p.mrp > p.price ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : 0;
+        return `
+          <div class="bg-white rounded-2xl p-3 shadow-sm border flex flex-col justify-between">
+            <div>
+              <div class="relative">
+                <img src="${p.image || 'https://placehold.co/200x160?text=Item'}" alt="${p.name}"
+                  class="w-full h-28 object-contain rounded-xl bg-gray-50 p-1" />
+                ${discount > 0 ? `<span class="absolute top-1 left-1 bg-[#d97706] text-white text-[10px] font-bold px-1.5 py-0.5 rounded">${discount}% OFF</span>` : ''}
+              </div>
+              <p class="text-[11px] text-gray-500 mt-2">${p.unit || '1 Pack'}</p>
+              <h3 class="font-semibold text-sm leading-tight line-clamp-2">${p.name}</h3>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-base text-[#14532d]">₹${p.price}</span>
+                ${p.mrp > p.price ? `<span class="text-xs text-gray-400 line-through ml-1">₹${p.mrp}</span>` : ''}
+              </div>
+              ${outOfStock
+                ? `<span class="text-[11px] font-bold text-red-600">Out of Stock</span>`
+                : qty === 0
+                  ? `<button onclick="changeQty('${p.id}', 1)" class="bg-[#d97706] text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Add</button>`
+                  : `<div class="flex items-center bg-[#14532d] text-white rounded-lg">
+                      <button onclick="changeQty('${p.id}', -1)" class="px-2 py-1 text-sm font-bold">-</button>
+                      <span class="px-1.5 text-xs font-bold">${qty}</span>
+                      <button onclick="changeQty('${p.id}', 1)" class="px-2 py-1 text-sm font-bold">+</button>
+                    </div>`
+              }
+            </div>
+          </div>`;
+      }).join('') || '<p class="col-span-2 text-center text-sm text-gray-500 py-8">Koi item nahi mila.</p>';
+    };
+
+    window.changeQty = (id, delta) => {
+      const prod = products.find(p => p.id === id);
+      if (!prod) return;
+      const next = (cart[id] || 0) + delta;
+      if (next <= 0) delete cart[id];
+      else if (next <= (prod.stock || 0)) cart[id] = next;
+      else alert('Stock limit reached!');
+      localStorage.setItem('nd_cart', JSON.stringify(cart));
+      renderProducts();
+      updateCartUI();
+    };
+
+    function getCartStats() {
+      let itemTotal = 0, mrpTotal = 0, count = 0;
+      const items = [];
+      for (const [id, qty] of Object.entries(cart)) {
+        const p = products.find(x => x.id === id);
+        if (p && qty > 0) {
+          itemTotal += p.price * qty;
+          mrpTotal += (p.mrp || p.price) * qty;
+          count += qty;
+          items.push({ id: p.id, name: p.name, unit: p.unit, price: p.price, qty });
+        }
+      }
+      const delivery = itemTotal >= storeSettings.freeDeliveryMin ? 0 : storeSettings.deliveryFee;
+      const handling = count > 0 ? storeSettings.handlingFee : 0;
+      const grandTotal = Math.max(0, itemTotal + delivery + handling - appliedDiscount);
+      return { items, count, itemTotal, mrpTotal, delivery, handling, grandTotal, savings: (mrpTotal - itemTotal) + appliedDiscount };
+    }
+
+    function updateCartUI() {
+      const s = getCartStats();
+      const bar = document.getElementById('cartBar');
+      if (s.count > 0) {
+        bar.classList.remove('hidden');
+        document.getElementById('cartCount').textContent = s.count;
+        document.getElementById('cartTotal').textContent = s.grandTotal;
+      } else {
+        bar.classList.add('hidden');
+      }
+      if (!document.getElementById('cartModal').classList.contains('hidden')) renderCartModal();
+    }
+
+    window.openCartModal = () => {
+      renderCartModal();
+      document.getElementById('cartModal').classList.remove('hidden');
+    };
+
+    function renderCartModal() {
+      const s = getCartStats();
+      const diff = storeSettings.freeDeliveryMin - s.itemTotal;
+      document.getElementById('freeDeliveryNudge').textContent = diff > 0
+        ? `₹${diff} ka samaan aur jodein aur FREE Delivery paayein!`
+        : 'Badhai ho! Aapko FREE Delivery mil rahi hai.';
+
+      document.getElementById('cartItemsList').innerHTML = s.items.map(i => `
+        <div class="py-2 flex justify-between items-center text-sm">
+          <div>
+            <p class="font-semibold">${i.name}</p>
+            <p class="text-xs text-gray-500">${i.unit} × ${i.qty} = ₹${i.price * i.qty}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="changeQty('${i.id}', -1)" class="w-7 h-7 bg-gray-200 rounded font-bold">-</button>
+            <span class="font-bold">${i.qty}</span>
+            <button onclick="changeQty('${i.id}', 1)" class="w-7 h-7 bg-[#14532d] text-white rounded font-bold">+</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('billSummary').innerHTML = `
+        <div class="flex justify-between"><span>Items Total</span><span>₹${s.itemTotal}</span></div>
+        <div class="flex justify-between"><span>Delivery Fee</span><span>${s.delivery === 0 ? 'FREE' : '₹' + s.delivery}</span></div>
+        <div class="flex justify-between"><span>Handling Fee</span><span>₹${s.handling}</span></div>
+        ${appliedDiscount > 0 ? `<div class="flex justify-between text-green-700 font-semibold"><span>Coupon Discount</span><span>-₹${appliedDiscount}</span></div>` : ''}
+        <div class="flex justify-between font-bold text-base border-t pt-1.5 mt-1"><span>To Pay</span><span>₹${s.grandTotal}</span></div>
+        <p class="text-xs text-green-700 font-semibold">Total Savings: ₹${s.savings}</p>
+      `;
+    }
+
+    window.applyCoupon = () => {
+      const code = document.getElementById('couponInput').value.trim().toUpperCase();
+      const s = getCartStats();
+      if (code === 'WELCOME30' && s.itemTotal >= 300) {
+        appliedDiscount = 30;
+        alert('WELCOME30 applied! ₹30 discount mil gaya.');
+      } else {
+        appliedDiscount = 0;
+        alert('Invalid coupon ya minimum ₹300 cart zaroori hai.');
+      }
+      renderCartModal();
+    };
+
+    window.placeOrder = async () => {
+      const s = getCartStats();
+      const name = document.getElementById('custName').value.trim();
+      const phone = document.getElementById('custPhone').value.trim();
+      const address = document.getElementById('custAddress').value.trim();
+      const slot = document.getElementById('deliverySlot').value;
+      const paymentMode = document.getElementById('paymentMode').value;
+
+      if (!s.count || !name || phone.length < 10 || !address) {
+        return alert('Kripya naam, 10-digit phone aur pura address bharein.');
+      }
+
+      const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      const orderRef = await addDoc(collection(db, 'orders'), {
+        customerName: name,
+        phone,
+        address,
+        pincode: localStorage.getItem('nd_pincode') || '',
+        slot,
+        paymentMode,
+        items: s.items,
+        total: s.grandTotal,
+        status: 'Placed',
+        deliveryOtp: otp,
+        riderName: 'Unassigned',
+        codSettled: false,
+        createdAt: serverTimestamp()
+      });
+
+      // Auto-decrement stock (Blueprint Module 4)
+      for (const item of s.items) {
+        await updateDoc(doc(db, 'products', item.id), { stock: increment(-item.qty) });
+      }
+
+      // Save for "Buy Again" & Order Tracking
+      const pastIds = JSON.parse(localStorage.getItem('nd_order_ids') || '[]');
+      pastIds.unshift(orderRef.id);
+      localStorage.setItem('nd_order_ids', JSON.stringify(pastIds.slice(0, 10)));
+      localStorage.setItem('nd_last_basket', JSON.stringify(cart));
+
+      cart = {};
+      appliedDiscount = 0;
+      localStorage.removeItem('nd_cart');
+      closeModal('cartModal');
+      renderProducts();
+      updateCartUI();
+
+      if (paymentMode === 'UPI') {
+        const upiUrl = `upi://pay?pa=${storeSettings.upiId}&pn=NEXITE%20DAILY&am=${s.grandTotal}&cu=INR&tn=Order%20${orderRef.id.slice(0,6)}`;
+        window.location.href = upiUrl;
+      }
+      alert(`Order Placed! Delivery OTP: ${otp}`);
+      openOrdersModal();
+    };
+
+    // Screen 4: Buy Again (1-Click Repeat Basket)
+    window.openBuyAgain = () => {
+      const last = JSON.parse(localStorage.getItem('nd_last_basket') || '{}');
+      if (Object.keys(last).length === 0) return alert('Abhi koi pichla order save nahi hai.');
+      cart = { ...last };
+      localStorage.setItem('nd_cart', JSON.stringify(cart));
+      renderProducts();
+      updateCartUI();
+      openCartModal();
+    };
+
+    // Screen 6: Live Order Tracker
+    window.openOrdersModal = () => {
+      document.getElementById('ordersModal').classList.remove('hidden');
+      const ids = JSON.parse(localStorage.getItem('nd_order_ids') || '[]');
+      const box = document.getElementById('myOrdersList');
+      if (!ids.length) { box.innerHTML = '<p class="text-sm text-gray-500">Koi order nahi mila.</p>'; return; }
+      box.innerHTML = '';
+      ids.forEach(id => {
+        onSnapshot(doc(db, 'orders', id), (snap) => {
+          if (!snap.exists()) return;
+          const o = snap.data();
+          let el = document.getElementById('ord-' + id);
+          if (!el) { el = document.createElement('div'); el.id = 'ord-' + id; box.appendChild(el); }
+          el.className = 'border rounded-xl p-3 text-sm bg-gray-50';
+          el.innerHTML = `
+            <div class="flex justify-between font-bold">
+              <span>#${id.slice(0,6).toUpperCase()}</span>
+              <span class="text-[#14532d]">${o.status}</span>
+            </div>
+            <p class="text-xs text-gray-600 mt-1">Total: ₹${o.total} (${o.paymentMode}) | Slot: ${o.slot}</p>
+            <p class="text-xs font-bold text-[#d97706] mt-1">Delivery OTP: ${o.deliveryOtp} | Rider: ${o.riderName}</p>
+          `;
+        });
+      });
+    };
+  </script>
+</body>
+</html>
