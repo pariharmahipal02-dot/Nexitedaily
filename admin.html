@@ -4,28 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NEXITE DAILY — Admin Panel</title>
+  <meta name="theme-color" content="#14532d" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
 
-  <!-- Admin Login -->
+  <!-- Admin Login Screen -->
   <div id="loginBox" class="min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white p-6 rounded-2xl shadow-lg max-w-sm w-full">
+    <form onsubmit="event.preventDefault(); adminLogin();" class="bg-white p-6 rounded-2xl shadow-lg max-w-sm w-full">
       <h1 class="text-xl font-bold text-[#14532d]">NEXITE DAILY Admin</h1>
       <p class="text-xs text-gray-500 mb-4">Authorized Control Room Login</p>
-      <input id="adminEmail" type="email" placeholder="Admin Email" class="w-full border rounded-xl px-3 py-2.5 mb-3 text-sm" />
-      <input id="adminPass" type="password" placeholder="Password" class="w-full border rounded-xl px-3 py-2.5 mb-4 text-sm" />
-      <button onclick="adminLogin()" class="w-full bg-[#14532d] text-white py-2.5 rounded-xl font-bold">Login</button>
-      <p id="loginErr" class="text-xs text-red-600 mt-2 hidden"></p>
-    </div>
+      <input id="adminEmail" type="email" required placeholder="Admin Email"
+        class="w-full border rounded-xl px-3 py-2.5 mb-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#14532d]" />
+      <input id="adminPass" type="password" required placeholder="Password"
+        class="w-full border rounded-xl px-3 py-2.5 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#14532d]" />
+      <button id="loginBtn" type="submit"
+        class="w-full bg-[#14532d] text-white py-2.5 rounded-xl font-bold disabled:opacity-50">
+        Login
+      </button>
+      <p id="loginErr" class="text-xs text-red-600 mt-3 hidden"></p>
+    </form>
   </div>
 
   <!-- Main Admin Dashboard -->
   <div id="dashboard" class="hidden max-w-5xl mx-auto p-4 pb-16">
-    <div class="flex flex-wrap justify-between items-center gap-2 bg-[#14532d] text-white p-4 rounded-2xl mb-4">
+    <div class="flex flex-wrap justify-between items-center gap-2 bg-[#14532d] text-white p-4 rounded-2xl mb-4 shadow">
       <div>
-        <h1 class="font-bold text-lg">NEXITE DAILY Control Room</h1>
-        <p class="text-xs text-green-200">Live Order Bell & 1-Second Sync Active</p>
+        <h1 class="font-bold text-lg leading-tight">NEXITE DAILY Control Room</h1>
+        <p class="text-xs text-green-200">UID Verified • Live Order Bell & Sync Active</p>
       </div>
       <div class="flex gap-2">
         <button onclick="testBell()" class="bg-[#d97706] px-3 py-1.5 rounded-lg text-xs font-bold">Test Bell</button>
@@ -35,14 +46,26 @@
 
     <!-- KPI Cards -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-      <div class="bg-white p-3 rounded-xl shadow-sm"><p class="text-xs text-gray-500">Total Orders</p><p id="kpiOrders" class="text-xl font-bold">0</p></div>
-      <div class="bg-white p-3 rounded-xl shadow-sm"><p class="text-xs text-gray-500">Pending</p><p id="kpiPending" class="text-xl font-bold text-[#d97706]">0</p></div>
-      <div class="bg-white p-3 rounded-xl shadow-sm"><p class="text-xs text-gray-500">Revenue</p><p id="kpiRev" class="text-xl font-bold text-[#14532d]">₹0</p></div>
-      <div class="bg-white p-3 rounded-xl shadow-sm"><p class="text-xs text-gray-500">Low Stock (≤5)</p><p id="kpiLowStock" class="text-xl font-bold text-red-600">0</p></div>
+      <div class="bg-white p-3 rounded-xl shadow-sm">
+        <p class="text-xs text-gray-500">Total Orders</p>
+        <p id="kpiOrders" class="text-xl font-bold">0</p>
+      </div>
+      <div class="bg-white p-3 rounded-xl shadow-sm">
+        <p class="text-xs text-gray-500">Pending</p>
+        <p id="kpiPending" class="text-xl font-bold text-[#d97706]">0</p>
+      </div>
+      <div class="bg-white p-3 rounded-xl shadow-sm">
+        <p class="text-xs text-gray-500">Revenue</p>
+        <p id="kpiRev" class="text-xl font-bold text-[#14532d]">₹0</p>
+      </div>
+      <div class="bg-white p-3 rounded-xl shadow-sm">
+        <p class="text-xs text-gray-500">Low Stock (≤5)</p>
+        <p id="kpiLowStock" class="text-xl font-bold text-red-600">0</p>
+      </div>
     </div>
 
     <!-- Navigation Tabs -->
-    <div class="flex gap-2 mb-4 overflow-x-auto pb-1">
+    <div class="flex gap-2 mb-4 overflow-x-auto pb-1 no-scrollbar">
       <button id="btn-ordersTab" onclick="showTab('ordersTab')" class="tab-btn bg-[#14532d] text-white px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Live Orders</button>
       <button id="btn-productsTab" onclick="showTab('productsTab')" class="tab-btn bg-white border px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Catalog & Stock</button>
       <button id="btn-codTab" onclick="showTab('codTab')" class="tab-btn bg-white border px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Rider & COD</button>
@@ -50,7 +73,9 @@
     </div>
 
     <!-- Tab 1: Live Orders -->
-    <section id="ordersTab" class="space-y-3"></section>
+    <section id="ordersTab" class="space-y-3">
+      <p class="text-sm text-gray-500 bg-white p-4 rounded-xl">Orders load ho rahe hain...</p>
+    </section>
 
     <!-- Tab 2: Catalog & Stock Manager -->
     <section id="productsTab" class="hidden space-y-4">
@@ -64,7 +89,9 @@
         <input id="pStock" type="number" placeholder="Stock Qty" class="border rounded-lg p-2" />
         <input id="pExpiry" type="date" class="border rounded-lg p-2" />
         <input id="pImage" placeholder="Image URL (optional)" class="border rounded-lg p-2" />
-        <button onclick="addProduct()" class="col-span-2 sm:col-span-3 bg-[#14532d] text-white py-2.5 rounded-xl font-bold">+ Add Item Live</button>
+        <button id="addProdBtn" onclick="addProduct()" class="col-span-2 sm:col-span-3 bg-[#14532d] text-white py-2.5 rounded-xl font-bold disabled:opacity-50">
+          + Add Item Live
+        </button>
       </div>
       <div id="adminProductList" class="space-y-2"></div>
     </section>
@@ -108,13 +135,18 @@
         <label class="text-xs font-bold text-gray-600">Home Offer Banner Subtitle</label>
         <input id="setBannerSub" placeholder="₹299+ order par Free Delivery!" class="w-full border rounded-lg p-2.5 mt-1" />
       </div>
-      <button onclick="saveSettings()" class="w-full bg-[#d97706] text-white py-2.5 rounded-xl font-bold">Save All Settings</button>
+      <button id="saveSetBtn" onclick="saveSettings()" class="w-full bg-[#d97706] text-white py-2.5 rounded-xl font-bold disabled:opacity-50">
+        Save All Settings
+      </button>
     </section>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+    import {
+      getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, deleteDoc, setDoc, query, orderBy
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -129,16 +161,26 @@
       measurementId: "G-MY3W0T2SMN"
     };
 
+    const ADMIN_UID = "vjq4kjGsNshwSCDOIMyn6yH3bPC3";
+
     const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch (e) {}
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     let initialOrdersLoaded = false;
-    let listenersStarted = false;
+    let unsubscribers = [];
+
+    function stopListeners() {
+      unsubscribers.forEach(fn => { try { fn(); } catch (e) {} });
+      unsubscribers = [];
+      initialOrdersLoaded = false;
+    }
 
     function playOrderBell() {
       try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtx();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
@@ -154,12 +196,17 @@
     window.testBell = () => playOrderBell();
 
     function escapeHtml(str = '') {
-      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+      return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
     }
 
     window.adminLogin = async () => {
+      const btn = document.getElementById('loginBtn');
       const errBox = document.getElementById('loginErr');
       errBox.classList.add('hidden');
+      btn.disabled = true;
+      btn.textContent = 'Checking...';
       try {
         await signInWithEmailAndPassword(
           auth,
@@ -169,30 +216,42 @@
       } catch (e) {
         errBox.textContent = 'Login failed: ' + e.message;
         errBox.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Login';
       }
     };
 
-    window.logout = () => signOut(auth);
+    window.logout = async () => {
+      stopListeners();
+      await signOut(auth);
+    };
 
     window.showTab = (id) => {
       ['ordersTab', 'productsTab', 'codTab', 'settingsTab'].forEach(t => {
         document.getElementById(t).classList.add('hidden');
-        const btn = document.getElementById('btn-' + t);
-        btn.className = 'tab-btn bg-white border px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap';
+        document.getElementById('btn-' + t).className =
+          'tab-btn bg-white border px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap';
       });
       document.getElementById(id).classList.remove('hidden');
-      document.getElementById('btn-' + id).className = 'tab-btn bg-[#14532d] text-white px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap';
+      document.getElementById('btn-' + id).className =
+        'tab-btn bg-[#14532d] text-white px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap';
     };
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
+    onAuthStateChanged(auth, async (user) => {
+      const errBox = document.getElementById('loginErr');
+      if (user && user.uid === ADMIN_UID) {
+        errBox.classList.add('hidden');
         document.getElementById('loginBox').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
-        if (!listenersStarted) {
-          listenersStarted = true;
-          startListeners();
-        }
+        if (unsubscribers.length === 0) startListeners();
       } else {
+        stopListeners();
+        if (user && user.uid !== ADMIN_UID) {
+          await signOut(auth);
+          errBox.textContent = 'Access Denied! Ye account authorized Admin nahi hai.';
+          errBox.classList.remove('hidden');
+        }
         document.getElementById('loginBox').classList.remove('hidden');
         document.getElementById('dashboard').classList.add('hidden');
       }
@@ -200,89 +259,109 @@
 
     function startListeners() {
       // 1. Live Orders Listener
-      onSnapshot(query(collection(db, 'orders'), orderBy('createdAt', 'desc')), (snap) => {
-        if (initialOrdersLoaded && snap.docChanges().some(c => c.type === 'added')) playOrderBell();
-        initialOrdersLoaded = true;
+      const unsubOrders = onSnapshot(
+        query(collection(db, 'orders'), orderBy('createdAt', 'desc')),
+        (snap) => {
+          if (initialOrdersLoaded && snap.docChanges().some(c => c.type === 'added')) {
+            playOrderBell();
+          }
+          initialOrdersLoaded = true;
 
-        let rev = 0, pending = 0;
-        const orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        orders.forEach(o => {
-          if (o.status !== 'Cancelled') rev += (o.total || 0);
-          if (o.status === 'Placed' || o.status === 'Packed') pending++;
-        });
+          let rev = 0, pending = 0;
+          const orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          orders.forEach(o => {
+            if (o.status !== 'Cancelled') rev += Number(o.total || 0);
+            if (o.status === 'Placed' || o.status === 'Packed') pending++;
+          });
 
-        document.getElementById('kpiOrders').textContent = orders.length;
-        document.getElementById('kpiPending').textContent = pending;
-        document.getElementById('kpiRev').textContent = '₹' + rev;
+          document.getElementById('kpiOrders').textContent = orders.length;
+          document.getElementById('kpiPending').textContent = pending;
+          document.getElementById('kpiRev').textContent = '₹' + rev;
 
-        document.getElementById('ordersTab').innerHTML = orders.map(o => `
-          <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 ${
-            o.status === 'Delivered' ? 'border-green-600' : o.status === 'Cancelled' ? 'border-red-500' : 'border-[#d97706]'
-          }">
-            <div class="flex justify-between items-start gap-2">
-              <div>
-                <p class="font-bold">${escapeHtml(o.customerName)}
-                  <a href="tel:${escapeHtml(o.phone)}" class="text-blue-600 underline text-xs ml-1">${escapeHtml(o.phone)}</a>
-                </p>
-                <p class="text-xs text-gray-600">${escapeHtml(o.address)} - ${escapeHtml(o.pincode)}</p>
-                <p class="text-xs font-semibold text-[#14532d] mt-1">Slot: ${escapeHtml(o.slot)} | Mode: ${escapeHtml(o.paymentMode)} | OTP: ${escapeHtml(o.deliveryOtp)}</p>
+          document.getElementById('ordersTab').innerHTML = orders.map(o => `
+            <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 ${
+              o.status === 'Delivered' ? 'border-green-600' : o.status === 'Cancelled' ? 'border-red-500' : 'border-[#d97706]'
+            }">
+              <div class="flex justify-between items-start gap-2">
+                <div>
+                  <p class="font-bold">
+                    ${escapeHtml(o.customerName)}
+                    <a href="tel:${escapeHtml(o.phone)}" class="text-blue-600 underline text-xs ml-1">${escapeHtml(o.phone)}</a>
+                  </p>
+                  <p class="text-xs text-gray-600">${escapeHtml(o.address)} - ${escapeHtml(o.pincode)}</p>
+                  <p class="text-xs font-semibold text-[#14532d] mt-1">
+                    Slot: ${escapeHtml(o.slot)} | Mode: ${escapeHtml(o.paymentMode)} | OTP: ${escapeHtml(o.deliveryOtp)}
+                  </p>
+                  <p class="text-xs text-gray-500">Rider: ${escapeHtml(o.riderName || 'Unassigned')}</p>
+                </div>
+                <div class="text-right">
+                  <span class="font-bold text-lg">₹${o.total}</span>
+                  <p class="text-xs font-bold text-[#d97706]">${escapeHtml(o.status)}</p>
+                </div>
               </div>
-              <div class="text-right">
-                <span class="font-bold text-lg">₹${o.total}</span>
-                <p class="text-xs font-bold text-[#d97706]">${escapeHtml(o.status)}</p>
+              <div class="text-xs bg-gray-50 p-2 rounded-lg my-2">
+                ${(o.items || []).map(i => `${escapeHtml(i.name)} (${escapeHtml(i.unit)}) × ${i.qty}`).join(' | ')}
+              </div>
+              <div class="flex flex-wrap gap-2 mt-2 text-xs">
+                <button onclick="updateOrderStatus('${o.id}', 'Packed')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg font-bold">Mark Packed</button>
+                <button onclick="assignAndDispatch('${o.id}')" class="bg-[#d97706] text-white px-3 py-1.5 rounded-lg font-bold">Out for Delivery</button>
+                <button onclick="updateOrderStatus('${o.id}', 'Delivered')" class="bg-[#14532d] text-white px-3 py-1.5 rounded-lg font-bold">Delivered</button>
+                <button onclick="updateOrderStatus('${o.id}', 'Cancelled')" class="bg-red-100 text-red-700 px-3 py-1.5 rounded-lg font-bold">Cancel</button>
               </div>
             </div>
-            <div class="text-xs bg-gray-50 p-2 rounded-lg my-2">
-              ${(o.items || []).map(i => `${escapeHtml(i.name)} (${escapeHtml(i.unit)}) × ${i.qty}`).join(' | ')}
-            </div>
-            <div class="flex flex-wrap gap-2 mt-2 text-xs">
-              <button onclick="updateOrderStatus('${o.id}', 'Packed')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg font-bold">Mark Packed</button>
-              <button onclick="assignAndDispatch('${o.id}')" class="bg-[#d97706] text-white px-3 py-1.5 rounded-lg font-bold">Out for Delivery</button>
-              <button onclick="updateOrderStatus('${o.id}', 'Delivered')" class="bg-[#14532d] text-white px-3 py-1.5 rounded-lg font-bold">Delivered</button>
-              <button onclick="updateOrderStatus('${o.id}', 'Cancelled')" class="bg-red-100 text-red-700 px-3 py-1.5 rounded-lg font-bold">Cancel</button>
-            </div>
-          </div>
-        `).join('') || '<p class="text-sm text-gray-500 bg-white p-4 rounded-xl">Abhi koi order nahi aaya hai.</p>';
+          `).join('') || '<p class="text-sm text-gray-500 bg-white p-4 rounded-xl">Abhi koi order nahi aaya hai.</p>';
 
-        // COD Settlement Summary
-        const codOrders = orders.filter(o => o.paymentMode === 'COD' && o.status === 'Delivered' && !o.codSettled);
-        const codTotal = codOrders.reduce((a, b) => a + (b.total || 0), 0);
-        document.getElementById('codTab').innerHTML = `
-          <h3 class="font-bold text-base mb-3">Pending COD Cash Collection: ₹${codTotal}</h3>
-          <div class="space-y-2 text-sm">
-            ${codOrders.map(o => `
-              <div class="flex justify-between items-center border-b pb-2">
-                <span>Rider: <b>${escapeHtml(o.riderName)}</b> | ${escapeHtml(o.customerName)} — ₹${o.total}</span>
-                <button onclick="settleCod('${o.id}')" class="bg-[#14532d] text-white px-3 py-1 rounded-lg text-xs font-bold">Cash Settled</button>
-              </div>
-            `).join('') || '<p class="text-gray-500 text-xs">Aaj ka saara COD hisaab clear hai.</p>'}
-          </div>
-        `;
-      });
+          // COD Settlement Summary
+          const codOrders = orders.filter(o => o.paymentMode === 'COD' && o.status === 'Delivered' && !o.codSettled);
+          const codTotal = codOrders.reduce((a, b) => a + Number(b.total || 0), 0);
+          document.getElementById('codTab').innerHTML = `
+            <h3 class="font-bold text-base mb-3">Pending COD Cash Collection: ₹${codTotal}</h3>
+            <div class="space-y-2 text-sm">
+              ${codOrders.map(o => `
+                <div class="flex justify-between items-center border-b pb-2 gap-2">
+                  <span>Rider: <b>${escapeHtml(o.riderName)}</b> | ${escapeHtml(o.customerName)} — ₹${o.total}</span>
+                  <button onclick="settleCod('${o.id}')" class="bg-[#14532d] text-white px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap">Cash Settled</button>
+                </div>
+              `).join('') || '<p class="text-gray-500 text-xs">Aaj ka saara COD hisaab clear hai.</p>'}
+            </div>
+          `;
+        },
+        (err) => {
+          document.getElementById('ordersTab').innerHTML =
+            `<p class="text-sm text-red-600 bg-white p-4 rounded-xl">Orders load error: ${escapeHtml(err.message)}</p>`;
+        }
+      );
 
       // 2. Live Products Listener
-      onSnapshot(collection(db, 'products'), (snap) => {
-        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        document.getElementById('kpiLowStock').textContent = list.filter(p => (p.stock || 0) <= 5).length;
+      const unsubProducts = onSnapshot(
+        collection(db, 'products'),
+        (snap) => {
+          const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          document.getElementById('kpiLowStock').textContent = list.filter(p => Number(p.stock || 0) <= 5).length;
 
-        document.getElementById('adminProductList').innerHTML = list.map(p => `
-          <div class="bg-white p-3 rounded-xl shadow-sm flex flex-wrap justify-between items-center gap-2 text-sm">
-            <div>
-              <p class="font-bold">${escapeHtml(p.name)} <span class="text-xs text-gray-500">(${escapeHtml(p.unit)})</span></p>
-              <p class="text-xs ${p.stock <= 5 ? 'text-red-600 font-bold' : 'text-gray-600'}">
-                MRP: ₹${p.mrp || p.price} | Price: ₹${p.price} | Stock: ${p.stock} ${p.stock <= 5 ? '(LOW STOCK!)' : ''} | Exp: ${escapeHtml(p.expiry || 'N/A')}
-              </p>
+          document.getElementById('adminProductList').innerHTML = list.map(p => `
+            <div class="bg-white p-3 rounded-xl shadow-sm flex flex-wrap justify-between items-center gap-2 text-sm">
+              <div>
+                <p class="font-bold">${escapeHtml(p.name)} <span class="text-xs text-gray-500">(${escapeHtml(p.unit)})</span></p>
+                <p class="text-xs ${Number(p.stock) <= 5 ? 'text-red-600 font-bold' : 'text-gray-600'}">
+                  MRP: ₹${p.mrp || p.price} | Price: ₹${p.price} | Stock: ${p.stock} ${Number(p.stock) <= 5 ? '(LOW STOCK!)' : ''} | Exp: ${escapeHtml(p.expiry || 'N/A')}
+                </p>
+              </div>
+              <div class="flex gap-1.5">
+                <button onclick="quickEdit('${p.id}', ${Number(p.price || 0)}, ${Number(p.stock || 0)})" class="bg-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold">Edit</button>
+                <button onclick="removeProduct('${p.id}')" class="bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-bold">Delete</button>
+              </div>
             </div>
-            <div class="flex gap-1.5">
-              <button onclick="quickEdit('${p.id}', ${p.price}, ${p.stock})" class="bg-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold">Edit</button>
-              <button onclick="removeProduct('${p.id}')" class="bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-bold">Delete</button>
-            </div>
-          </div>
-        `).join('') || '<p class="text-sm text-gray-500 bg-white p-4 rounded-xl">Abhi koi product nahi hai. Upar form se add karein.</p>';
-      });
+          `).join('') || '<p class="text-sm text-gray-500 bg-white p-4 rounded-xl">Abhi koi product nahi hai. Upar form se add karein.</p>';
+        },
+        (err) => {
+          document.getElementById('adminProductList').innerHTML =
+            `<p class="text-sm text-red-600 bg-white p-4 rounded-xl">Products load error: ${escapeHtml(err.message)}</p>`;
+        }
+      );
 
-      // 3. Load Saved Settings into Inputs
-      onSnapshot(doc(db, 'settings', 'store'), (snap) => {
+      // 3. Load Saved Settings
+      const unsubSettings = onSnapshot(doc(db, 'settings', 'store'), (snap) => {
         if (!snap.exists()) return;
         const d = snap.data();
         document.getElementById('setPins').value = (d.pincodes || []).join(', ');
@@ -294,43 +373,76 @@
         document.getElementById('setBannerTitle').value = d.bannerTitle || '';
         document.getElementById('setBannerSub').value = d.bannerSub || '';
       });
+
+      unsubscribers.push(unsubOrders, unsubProducts, unsubSettings);
     }
 
-    window.updateOrderStatus = (id, status) => updateDoc(doc(db, 'orders', id), { status });
-
-    window.assignAndDispatch = (id) => {
-      const rider = prompt('Delivery Boy ka naam likhein (e.g. Rahul):', 'Rahul');
-      if (rider && rider.trim()) {
-        updateDoc(doc(db, 'orders', id), { riderName: rider.trim(), status: 'Out for Delivery' });
+    window.updateOrderStatus = async (id, status) => {
+      try {
+        await updateDoc(doc(db, 'orders', id), { status });
+      } catch (e) {
+        alert('Status update failed: ' + e.message);
       }
     };
 
-    window.settleCod = (id) => updateDoc(doc(db, 'orders', id), { codSettled: true });
+    window.assignAndDispatch = async (id) => {
+      const rider = prompt('Delivery Boy ka naam likhein (e.g. Rahul):', 'Rahul');
+      if (rider && rider.trim()) {
+        try {
+          await updateDoc(doc(db, 'orders', id), {
+            riderName: rider.trim(),
+            status: 'Out for Delivery'
+          });
+        } catch (e) {
+          alert('Dispatch update failed: ' + e.message);
+        }
+      }
+    };
+
+    window.settleCod = async (id) => {
+      try {
+        await updateDoc(doc(db, 'orders', id), { codSettled: true });
+      } catch (e) {
+        alert('COD update failed: ' + e.message);
+      }
+    };
 
     window.addProduct = async () => {
+      const btn = document.getElementById('addProdBtn');
       const name = document.getElementById('pName').value.trim();
       const price = Number(document.getElementById('pPrice').value);
       const mrp = Number(document.getElementById('pMrp').value || price);
       const stock = Number(document.getElementById('pStock').value);
 
-      if (!name || !price) return alert('Product name aur Selling Price zaroori hai.');
+      if (!name || !price || price <= 0) {
+        return alert('Product name aur sahi Selling Price zaroori hai.');
+      }
 
-      await addDoc(collection(db, 'products'), {
-        name,
-        keywords: document.getElementById('pKeywords').value.trim(),
-        category: document.getElementById('pCategory').value.trim() || 'Grocery',
-        unit: document.getElementById('pUnit').value.trim() || '1 kg',
-        mrp,
-        price,
-        stock: isNaN(stock) ? 0 : stock,
-        expiry: document.getElementById('pExpiry').value,
-        image: document.getElementById('pImage').value.trim()
-      });
+      btn.disabled = true;
+      btn.textContent = 'Adding...';
+      try {
+        await addDoc(collection(db, 'products'), {
+          name,
+          keywords: document.getElementById('pKeywords').value.trim(),
+          category: document.getElementById('pCategory').value.trim() || 'Grocery',
+          unit: document.getElementById('pUnit').value.trim() || '1 kg',
+          mrp,
+          price,
+          stock: isNaN(stock) || stock < 0 ? 0 : stock,
+          expiry: document.getElementById('pExpiry').value,
+          image: document.getElementById('pImage').value.trim()
+        });
 
-      ['pName', 'pKeywords', 'pCategory', 'pUnit', 'pMrp', 'pPrice', 'pStock', 'pExpiry', 'pImage'].forEach(id => {
-        document.getElementById(id).value = '';
-      });
-      alert('Product live add ho gaya!');
+        ['pName', 'pKeywords', 'pCategory', 'pUnit', 'pMrp', 'pPrice', 'pStock', 'pExpiry', 'pImage'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        alert('Product live add ho gaya!');
+      } catch (e) {
+        alert('Product add fail hua: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '+ Add Item Live';
+      }
     };
 
     window.quickEdit = async (id, curPrice, curStock) => {
@@ -340,30 +452,50 @@
       if (sInput === null) return;
       const price = Number(pInput);
       const stock = Number(sInput);
-      if (!isNaN(price) && !isNaN(stock)) {
-        await updateDoc(doc(db, 'products', id), { price, stock });
+      if (!isNaN(price) && price > 0 && !isNaN(stock) && stock >= 0) {
+        try {
+          await updateDoc(doc(db, 'products', id), { price, stock });
+        } catch (e) {
+          alert('Edit fail hua: ' + e.message);
+        }
+      } else {
+        alert('Sahi numeric price aur stock daalein.');
       }
     };
 
     window.removeProduct = async (id) => {
       if (confirm('Kya aap is item ko delete karna chahte hain?')) {
-        await deleteDoc(doc(db, 'products', id));
+        try {
+          await deleteDoc(doc(db, 'products', id));
+        } catch (e) {
+          alert('Delete fail hua: ' + e.message);
+        }
       }
     };
 
     window.saveSettings = async () => {
+      const btn = document.getElementById('saveSetBtn');
       const pincodes = document.getElementById('setPins').value.split(',').map(s => s.trim()).filter(Boolean);
-      await setDoc(doc(db, 'settings', 'store'), {
-        pincodes: pincodes.length ? pincodes : ['342001'],
-        freeDeliveryMin: Number(document.getElementById('setFreeMin').value || 299),
-        deliveryFee: Number(document.getElementById('setDelFee').value || 25),
-        handlingFee: Number(document.getElementById('setHandleFee').value || 5),
-        upiId: document.getElementById('setUpi').value.trim(),
-        whatsapp: document.getElementById('setWa').value.trim(),
-        bannerTitle: document.getElementById('setBannerTitle').value.trim(),
-        bannerSub: document.getElementById('setBannerSub').value.trim()
-      }, { merge: true });
-      alert('Store settings live save ho gayi!');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      try {
+        await setDoc(doc(db, 'settings', 'store'), {
+          pincodes: pincodes.length ? pincodes : ['342001'],
+          freeDeliveryMin: Number(document.getElementById('setFreeMin').value || 299),
+          deliveryFee: Number(document.getElementById('setDelFee').value || 25),
+          handlingFee: Number(document.getElementById('setHandleFee').value || 5),
+          upiId: document.getElementById('setUpi').value.trim(),
+          whatsapp: document.getElementById('setWa').value.trim(),
+          bannerTitle: document.getElementById('setBannerTitle').value.trim(),
+          bannerSub: document.getElementById('setBannerSub').value.trim()
+        }, { merge: true });
+        alert('Store settings live save ho gayi!');
+      } catch (e) {
+        alert('Settings save fail hui: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save All Settings';
+      }
     };
   </script>
 </body>
