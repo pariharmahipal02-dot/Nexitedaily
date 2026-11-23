@@ -1,0 +1,50 @@
+========================================================
+NEXITEDAILY — FINAL PLAY STORE APP PACKAGE SETUP GUIDE
+========================================================
+
+Included Files & Folders:
+- index.html             : Main Customer App (Blinkit/Zomato/Domino's UI, GPS Map, Login, Safe Payment)
+- admin.html             : Pro Admin Control Room (UID Locked: vjq4kjGsNshwSCDOIMyn6yH3bPC3)
+- about.html             : Brand Story, Trust Guarantee & Contact Page
+- privacy.html           : Privacy Policy, Refund Rules, Terms, Account Deletion (#delete-account) & Grievance Officer
+- manifest.json          : PWA / Android App Manifest
+- sw.js                  : Service Worker (Offline & Fast Caching)
+- vercel.json            : Clean JSON headers for .well-known/assetlinks.json
+- firestore.rules        : Ready-to-publish Firebase Security Rules
+- sample-catalog.csv     : 15 Kirana SKUs for 1-click Bulk Upload in Admin Panel
+- icons/icon-192.png     : App Icon (192x192)
+- icons/icon-512.png     : Play Store App Icon (512x512)
+- assets/playstore-feature-graphic-1024x500.png : Exact Play Console Feature Graphic (1024x500)
+- assets/promo-banner.jpg                       : Web Promotional Banner
+- assets/logo-circle-hq.png & logo-full-brand.png
+- .well-known/assetlinks.json : Play Store TWA Digital Asset Links
+
+STEP 1: FIREBASE CONSOLE SETUP
+1. Open Firebase Console -> project 'nexitedaily'.
+2. Firestore Database -> Rules -> paste contents of 'firestore.rules' -> Click PUBLISH.
+3. Authentication -> Sign-in method -> Enable 'Email/Password' AND 'Google'.
+4. Authentication -> Settings -> Authorized domains -> Add your live Vercel/custom domain.
+
+STEP 2: DEPLOY ON VERCEL / NETLIFY
+1. Extract this ZIP and upload all files/folders directly to a GitHub repository.
+2. Import that repository in Vercel (or Netlify) and Deploy.
+3. Open https://your-domain/admin.html and login with your Admin UID email/password.
+4. Go to 'Zones & Settings' tab -> Save your Pincodes, Business UPI ID, WhatsApp Number, and (optional) Razorpay Key ID.
+5. Go to 'Catalog & Stock' tab -> Click 'Bulk CSV Upload' and upload 'sample-catalog.csv' to test live products immediately!
+
+STEP 3: CONVERT TO PLAY STORE .AAB (PWABUILDER)
+1. Go to https://www.pwabuilder.com and enter your live HTTPS URL.
+2. Click 'Package for Stores' -> Android -> All Settings.
+3. Package ID: in.nexitedaily.app | App Name: NexiteDaily | Theme Color: #14532d.
+4. IMPORTANT: Under Features, TURN ON 'Location Delegation' so GPS works natively inside the Android App.
+5. Generate & download the package (keep signing.keystore & signing-key-info.txt safe in Google Drive!).
+
+STEP 4: GOOGLE PLAY CONSOLE UPLOAD
+1. Upload the generated '.aab' file in Play Console -> Closed Testing (12 testers for 14 days for personal accounts).
+2. Store Listing Assets:
+   - App Icon: icons/icon-512.png
+   - Feature Graphic: assets/playstore-feature-graphic-1024x500.png
+   - Privacy Policy URL: https://your-domain/privacy.html
+   - Account Deletion URL: https://your-domain/privacy.html#delete-account
+3. Copy SHA-256 Fingerprint from Play Console -> App Integrity -> App Signing.
+4. Paste SHA-256 into '.well-known/assetlinks.json' and re-deploy on Vercel (removes browser URL bar inside app).
